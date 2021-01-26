@@ -9,28 +9,32 @@ public class Flow {
     private final Integer demand;
     private final Inet4Address srcIp;
     private final Inet4Address dstIp;
+    private final FlowPriority priority;
     private LinkedList<Inet4Address> currentPath = new LinkedList<>();//captures SwitchIps
     private LinkedList<Inet4Address> newPath = new LinkedList<>();
     private boolean isActive;
     private static  Integer firstAvailableFlowId;
 
     public Flow(Integer flowId, Integer demand, Inet4Address srcIp,
-                Inet4Address dstIp, LinkedList<Inet4Address> currentPath,boolean isActive) {
+                Inet4Address dstIp, LinkedList<Inet4Address> currentPath,boolean isActive,
+                FlowPriority priority) {
         this.flowId = firstAvailableFlowId;
         this.demand = demand;
         this.srcIp = srcIp;
         this.dstIp = dstIp;
         this.currentPath = currentPath;
         this.isActive = isActive;
+        this.priority = priority;
         firstAvailableFlowId+=1;
     }
 
-    public Flow(Inet4Address srcIp, Inet4Address dstIp,Integer demand) {
+    public Flow(Inet4Address srcIp, Inet4Address dstIp, Integer demand, FlowPriority priority) {
         this.flowId = firstAvailableFlowId;
         this.demand = demand;
         this.srcIp = srcIp;
         this.dstIp = dstIp;
         this.isActive=false;
+        this.priority = priority;
         firstAvailableFlowId+=1;
     }
 
@@ -60,6 +64,10 @@ public class Flow {
 
     public boolean isActive() {
         return isActive;
+    }
+
+    public FlowPriority getPriority() {
+        return priority;
     }
 
     public void setNewPath(LinkedList<Inet4Address> newPath) {
