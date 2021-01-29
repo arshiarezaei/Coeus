@@ -4,42 +4,26 @@ import java.net.Inet4Address;
 
 public class Link {
 
-    private final Inet4Address node1Address;
-    private final Inet4Address node2Address;
-    private final Integer port1;
-    private final Integer port2;
-    private final Integer capacity;
-    private Double delay;
-    private Double loss;
-    private Integer availableCapacity;
+    protected final Inet4Address node1Address;
+    protected final Inet4Address node2Address;
+    protected final Integer node1Port;
+    protected final Integer node2Port;
+    protected final Integer capacity;
+    protected Double delay;
+    protected Double loss;
+    protected Integer availableCapacity;
 
     public Link(Inet4Address node1Address, Inet4Address node2Address,
-                Integer port1, Integer port2, Integer capacity,
+                Integer node1Port, Integer node2Port, Integer capacity,
                 Double delay, Double loss) {
         this.node1Address = node1Address;
         this.node2Address = node2Address;
-        this.port1 = port1;
-        this.port2 = port2;
+        this.node1Port = node1Port;
+        this.node2Port = node2Port;
         this.capacity = capacity;
         this.delay = delay;
         this.loss = loss;
         this.availableCapacity = capacity;
-    }
-
-    public Inet4Address getNode1Address() {
-        return node1Address;
-    }
-
-    public Inet4Address getNode2Address() {
-        return node2Address;
-    }
-
-    public Integer getPort1() {
-        return port1;
-    }
-
-    public Integer getPort2() {
-        return port2;
     }
 
     public Integer getCapacity() {
@@ -52,5 +36,18 @@ public class Link {
 
     public Double getLoss() {
         return loss;
+    }
+
+    public Integer getAvailableCapacity() {
+        return availableCapacity;
+    }
+    public Integer consumeLink(Integer amount){
+        // TODO: handle link over-subscription
+        availableCapacity -= amount;
+        return availableCapacity;
+    }
+    public Integer releaseLink(Integer amount){
+        availableCapacity += amount;
+        return availableCapacity;
     }
 }
