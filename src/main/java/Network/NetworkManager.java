@@ -17,15 +17,17 @@ public class NetworkManager {
         //TODO:
         // reads a file which contains nodes and links information
         readSwitchesFromFile();
+        readHostsFromFile();
     }
     public static Switch addNewSwitch(Switch newSwitch){
         //TODO:
         switches.add(newSwitch);
-        return null;
+        return newSwitch;
     }
-    public static Host addNewHost(){
+    public static Host addNewHost(Host newHost){
         //TODO:
-        return null;
+        hosts.add(newHost);
+        return newHost;
     }
     public static Link addLinkBetweenSwitchAndHost(Inet4Address switchAddress,Inet4Address hostAddress){
         //TODO:
@@ -47,8 +49,27 @@ public class NetworkManager {
             String dpid = switchProperties[2];
             Integer switchId = Integer.valueOf(switchProperties[0].substring(1));
             Switch newSwitch = new Switch(ipAddress,switchId,dpid,dpid);
+            addNewSwitch(newSwitch);
             System.out.println(newSwitch);
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
+    private static void readHostsFromFile(){
+        try{
+            Scanner hostsFile = new Scanner(new File("hosts.txt"));
+            while (hostsFile.hasNextLine()){
+                String line = hostsFile.nextLine();
+                String hostsProperties[] = line.split(" ");
+                String name = hostsProperties[0];
+                Inet4Address ipAddress = (Inet4Address) Inet4Address.getByName(hostsProperties[1]);
+                String mac = hostsProperties[2];
+                Integer hostId = Integer.valueOf(hostsProperties[0].substring(1));
+                Host newHost = new Host(ipAddress,name,hostId);
+                addNewHost(newHost);
+                System.out.println(newHost);
+            }
         }catch (Exception e){
             System.out.println(e);
         }
