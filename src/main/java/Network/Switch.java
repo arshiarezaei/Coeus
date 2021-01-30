@@ -68,4 +68,16 @@ public class Switch extends Node {
         flowTable.remove(rule);
     }
 
+    @Override
+    public String toString() {
+        return "Switch{" +
+                "switchId=" + switchId +
+                ", dpid='" + dpid + '\'' +
+                ", macAddress='" + macAddress + '\'' +
+                ", inputLinks=" + inputLinks +
+                ", outputLinks=" + outputLinks +
+                ", bidirectionalLinks=" + bidirectionalLinks +
+                ", flowTable=" + flowTable +
+                '}';
+    }
 }
