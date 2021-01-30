@@ -7,7 +7,7 @@ import java.util.*;
 public class Switch extends Node {
 
     private final Integer switchId;
-    private final String DPId;
+    private final String dpid;
     private final String macAddress;
 
     private Dictionary<Integer,UniDirectionalLink> inputLinks = new Hashtable<>();
@@ -16,10 +16,10 @@ public class Switch extends Node {
 
     private Set<Rule> flowTable = new HashSet<>();
 
-    public Switch(Inet4Address ip, Integer switchId, String DPId, String macAddress) {
+    public Switch(Inet4Address ip, Integer switchId, String dpid, String macAddress) {
         super(ip,"s"+switchId);
         this.switchId = switchId;
-        this.DPId = DPId;
+        this.dpid = dpid;
         this.macAddress = macAddress;
     }
 
@@ -27,8 +27,8 @@ public class Switch extends Node {
         return switchId;
     }
 
-    public String getDPId() {
-        return DPId;
+    public String getDpid() {
+        return dpid;
     }
 
     public String getMacAddress() {
