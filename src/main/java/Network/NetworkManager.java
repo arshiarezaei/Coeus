@@ -162,9 +162,9 @@ public class NetworkManager {
             networkGraph.addVertex(s);
 
         }
-//        for (Host h:hosts) {
-//            networkGraph.addVertex(h);
-//        }
+        for (Host h:hosts) {
+            networkGraph.addVertex(h);
+        }
         JGraphXAdapter<Node, BidirectionalLink> graphAdapter = new JGraphXAdapter<>(networkGraph);
         mxIGraphLayout layout = new mxCircleLayout(graphAdapter);
         layout.execute(graphAdapter.getDefaultParent());

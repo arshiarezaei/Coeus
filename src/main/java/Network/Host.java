@@ -18,10 +18,6 @@ public class Host extends Node {
 
     @Override
     public String toString() {
-        return "Host{" +
-                "hostId=" + hostId +
-                ", ip=" + ip +
-                ", name='" + name + '\'' +
-                '}';
+        return "h"+ hostId ;
     }
 }

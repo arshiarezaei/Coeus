@@ -70,8 +70,6 @@ public class Switch extends Node {
 
     @Override
     public String toString() {
-        return "Switch{" +
-                "switchId=" + switchId +
-                '}';
+        return "s"+ switchId ;
     }
 }
