@@ -3,10 +3,9 @@ import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.util.mxCellRenderer;
 import org.jgrapht.ext.JGraphXAdapter;
-import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleGraph;
 import org.junit.AfterClass;
-import org.junit.Test;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -16,7 +15,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.Set;
-
 import static org.junit.Assert.assertTrue;
 
 
@@ -24,7 +22,7 @@ public class NetworkManager {
 
     private static Set<Switch> switches = new HashSet<>();
     private static Set<Host> hosts = new HashSet<>();
-    private static Set<Link> linkSet = new HashSet<>();
+    private static Set<BidirectionalLink> linkSet = new HashSet<>();
 
 
     public static void constructTopology(){
@@ -32,7 +30,7 @@ public class NetworkManager {
         // reads a file which contains nodes and links information
         readSwitchesFromFile();
         readHostsFromFile();
-        LinkedList<Link> newLinks = readLinksFromFile();
+        LinkedList<BidirectionalLink> newLinks = readLinksFromFile();
         linkSet.addAll(newLinks);
         visualizeNetwork();
     }
@@ -91,20 +89,15 @@ public class NetworkManager {
             System.out.println(e);
         }
     }
-    private static LinkedList<Link> readLinksFromFile(){
-        LinkedList<Link> newLinks = new LinkedList<>();
+    private static LinkedList<BidirectionalLink> readLinksFromFile(){
+        LinkedList<BidirectionalLink> newLinks = new LinkedList<>();
         try {
             Scanner linksFile = new Scanner(new File("links.txt"));
             while (linksFile.hasNextLine()) {
                 String line = linksFile.nextLine();
                 line = line.replaceAll("<","");
                 line = line.replaceAll(">","");
-//                System.out.println(line);
                 String[] linkProperties = line.split("-");
-//                for (String s:linkProperties) {
-//                    System.out.println(s);
-//                }
-                // first node properties
                 Integer firsNodeSwitchId = Integer.valueOf(linkProperties[0].replace("s",""));
                 Integer firstNodePort = Integer.valueOf(linkProperties[1].replace("eth",""));
                 Inet4Address firstNodeIp = findSwitchWithId(firsNodeSwitchId).getIp();
@@ -119,11 +112,14 @@ public class NetworkManager {
                     secondNodeIp = findSwitchWithId(secondNodeId).getIp();
                 }else if(secondNodeType.startsWith("h")){
                     // node is a host
-                    secondNodeIp = findHostWithId(secondNodeId).getIp();
+                    System.out.println("node is a host");
+                    Host host = findHostWithId(secondNodeId);
+                    host.setConnectedSwitch(switch1);
+                    secondNodeIp = host.getIp();
                 }
 
 //                System.out.println("first node "+firsNodeSwitchId+" first node port"+firstNodePort+
-//                        " second node "+secondNodeType+" "+secondNodeIp+" second node port"+secondNodePort);
+//                        " second node "+secondNodeType+" "+secondNodeId+" second node port"+secondNodePort);
                 BidirectionalLink newLink = new BidirectionalLink(firstNodeIp,secondNodeIp,firstNodePort,secondNodePort,1000);
                 switch1.addNewBidirectionalLink(newLink,firstNodePort);
                 newLinks.add(newLink);
@@ -145,8 +141,9 @@ public class NetworkManager {
             }
             return  null;
         }
-    private static Host findHostWithId(Integer id){
-        for (Host s:hosts) {
+
+        private static Host findHostWithId(Integer id){
+            for (Host s:hosts) {
             if (s.getHostId().equals(id)){
                 return s;
             }
@@ -154,16 +151,30 @@ public class NetworkManager {
         return  null;
     }
 
+    private static Switch findSwitchWithIp(Inet4Address ip){
+        for (Switch s:switches) {
+            if(s.getIp().equals(ip)){
+                return s;
+            }
+        }
+        return null;
+    }
     @AfterClass
     private static void visualizeNetwork(){
-         SimpleDirectedGraph<Node,BidirectionalLink> networkGraph = new SimpleDirectedGraph(BidirectionalLink.class);
-        Integer i = 0;
+        SimpleGraph<Node,BidirectionalLink> networkGraph =
+                new SimpleGraph(DefaultEdge.class);//SimpleDirectedGraph(BidirectionalLink.class);
          for (Switch s:switches) {
             networkGraph.addVertex(s);
 
         }
         for (Host h:hosts) {
             networkGraph.addVertex(h);
+        }
+        for (BidirectionalLink link:linkSet) {
+            Switch switch1 = findSwitchWithIp(link.node1Address);
+            Switch switch2 = findSwitchWithIp(link.node2Address);
+            networkGraph.addEdge(switch1,switch2,link);
+
         }
         JGraphXAdapter<Node, BidirectionalLink> graphAdapter = new JGraphXAdapter<>(networkGraph);
         mxIGraphLayout layout = new mxCircleLayout(graphAdapter);

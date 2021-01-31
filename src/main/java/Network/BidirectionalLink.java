@@ -30,4 +30,9 @@ public class BidirectionalLink extends Link{
     public Integer getNode2Port() {
         return node2Port;
     }
+
+    @Override
+    public String toString() {
+        return "";
+    }
 }
