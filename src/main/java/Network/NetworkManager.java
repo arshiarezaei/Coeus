@@ -2,6 +2,7 @@ package Network;
 import java.io.File;
 import java.net.Inet4Address;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -18,6 +19,8 @@ public class NetworkManager {
         // reads a file which contains nodes and links information
         readSwitchesFromFile();
         readHostsFromFile();
+        readLinksFromFile();
+
     }
     public static Switch addNewSwitch(Switch newSwitch){
         //TODO:
@@ -58,7 +61,7 @@ public class NetworkManager {
     }
     private static void readHostsFromFile(){
         try{
-            Scanner hostsFile = new Scanner(new File("hosts.txt"));
+            Scanner hostsFile = new Scanner(new File("host.txt"));
             while (hostsFile.hasNextLine()){
                 String line = hostsFile.nextLine();
                 String hostsProperties[] = line.split(" ");
@@ -74,5 +77,59 @@ public class NetworkManager {
             System.out.println(e);
         }
     }
-
+    private static LinkedList<Link> readLinksFromFile(){
+        LinkedList<Link> newLinks = new LinkedList<>();
+        Link newLink= null;
+        try {
+            Scanner linksFile = new Scanner(new File("links.txt"));
+            while (linksFile.hasNextLine()) {
+                String line = linksFile.nextLine();
+                line = line.replaceAll("<","");
+                line = line.replaceAll(">","");
+//                System.out.println(line);
+                String[] linkProperties = line.split("-");
+//                for (String s:linkProperties) {
+//                    System.out.println(s);
+//                }
+                // first node properties
+                Integer firsNodeSwitchId = Integer.valueOf(linkProperties[0].replace("s",""));
+                Integer firstNodePort = Integer.valueOf(linkProperties[1].replace("eth",""));
+                // second node properties
+                Integer secondNodePort = Integer.valueOf(linkProperties[3].replace("eth",""));
+                String secondNodeType = linkProperties[2];
+                Integer secondNodeId = Integer.valueOf(secondNodeType.substring(1));
+                Inet4Address secondNodeIp=null;
+                if(secondNodeType.startsWith("s")){
+                    // node is a switch
+                    secondNodeIp = findSwitchWithId(secondNodeId).getIp();
+                }else if(secondNodeType.startsWith("h")){
+                    // node is a host
+                    secondNodeIp = findHostWithId(secondNodeId).getIp();
+                }
+                Inet4Address firstNodeIp = findSwitchWithId(firsNodeSwitchId).getIp();
+//                System.out.println("first node "+firsNodeSwitchId+" first node port"+firstNodePort+
+//                        " second node "+secondNodeType+" "+secondNodeIp+" second node port"+secondNodePort);
+            }
+            }catch(Exception e){
+                System.out.println(e);
+            }finally{
+                return newLinks;
+            }
+        }
+        private static Switch findSwitchWithId(Integer id){
+            for (Switch s:switches) {
+                if (s.getSwitchId().equals(id)){
+                    return s;
+                }
+            }
+            return  null;
+        }
+    private static Host findHostWithId(Integer id){
+        for (Host s:hosts) {
+            if (s.getHostId().equals(id)){
+                return s;
+            }
+        }
+        return  null;
+    }
 }
