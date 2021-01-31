@@ -1,10 +1,23 @@
 package Network;
+import com.mxgraph.layout.mxCircleLayout;
+import com.mxgraph.layout.mxIGraphLayout;
+import com.mxgraph.util.mxCellRenderer;
+import org.jgrapht.ext.JGraphXAdapter;
+import org.jgrapht.graph.SimpleDirectedGraph;
+import org.junit.AfterClass;
+import org.junit.Test;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.Inet4Address;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.Set;
+
+import static org.junit.Assert.assertTrue;
 
 
 public class NetworkManager {
@@ -19,8 +32,9 @@ public class NetworkManager {
         // reads a file which contains nodes and links information
         readSwitchesFromFile();
         readHostsFromFile();
-        readLinksFromFile();
-
+        LinkedList<Link> newLinks = readLinksFromFile();
+        linkSet.addAll(newLinks);
+        visualizeNetwork();
     }
     public static Switch addNewSwitch(Switch newSwitch){
         //TODO:
@@ -79,7 +93,6 @@ public class NetworkManager {
     }
     private static LinkedList<Link> readLinksFromFile(){
         LinkedList<Link> newLinks = new LinkedList<>();
-        Link newLink= null;
         try {
             Scanner linksFile = new Scanner(new File("links.txt"));
             while (linksFile.hasNextLine()) {
@@ -94,11 +107,13 @@ public class NetworkManager {
                 // first node properties
                 Integer firsNodeSwitchId = Integer.valueOf(linkProperties[0].replace("s",""));
                 Integer firstNodePort = Integer.valueOf(linkProperties[1].replace("eth",""));
+                Inet4Address firstNodeIp = findSwitchWithId(firsNodeSwitchId).getIp();
                 // second node properties
                 Integer secondNodePort = Integer.valueOf(linkProperties[3].replace("eth",""));
                 String secondNodeType = linkProperties[2];
                 Integer secondNodeId = Integer.valueOf(secondNodeType.substring(1));
                 Inet4Address secondNodeIp=null;
+                Switch switch1 = findSwitchWithId(firsNodeSwitchId);
                 if(secondNodeType.startsWith("s")){
                     // node is a switch
                     secondNodeIp = findSwitchWithId(secondNodeId).getIp();
@@ -106,9 +121,15 @@ public class NetworkManager {
                     // node is a host
                     secondNodeIp = findHostWithId(secondNodeId).getIp();
                 }
-                Inet4Address firstNodeIp = findSwitchWithId(firsNodeSwitchId).getIp();
+
 //                System.out.println("first node "+firsNodeSwitchId+" first node port"+firstNodePort+
 //                        " second node "+secondNodeType+" "+secondNodeIp+" second node port"+secondNodePort);
+                BidirectionalLink newLink = new BidirectionalLink(firstNodeIp,secondNodeIp,firstNodePort,secondNodePort,1000);
+                switch1.addNewBidirectionalLink(newLink,firstNodePort);
+                newLinks.add(newLink);
+                if(secondNodeType.startsWith("s")){
+                    findSwitchWithId(secondNodeId).addNewBidirectionalLink(newLink,secondNodePort);
+                }
             }
             }catch(Exception e){
                 System.out.println(e);
@@ -131,5 +152,39 @@ public class NetworkManager {
             }
         }
         return  null;
+    }
+
+    @AfterClass
+    private static void visualizeNetwork(){
+         SimpleDirectedGraph<Node,BidirectionalLink> networkGraph = new SimpleDirectedGraph(BidirectionalLink.class);
+        Integer i = 0;
+         for (Switch s:switches) {
+            networkGraph.addVertex(s);
+
+        }
+//        for (Host h:hosts) {
+//            networkGraph.addVertex(h);
+//        }
+        JGraphXAdapter<Node, BidirectionalLink> graphAdapter = new JGraphXAdapter<>(networkGraph);
+        mxIGraphLayout layout = new mxCircleLayout(graphAdapter);
+        layout.execute(graphAdapter.getDefaultParent());
+        File imgFile = new File("graph.png");
+        try {
+            imgFile.createNewFile();
+        }catch (Exception e){
+            System.out.println("s");
+        }
+        BufferedImage image = mxCellRenderer.createBufferedImage(graphAdapter, null, 2, Color.WHITE, true, null);
+
+
+        try {
+            ImageIO.write(image, "PNG", imgFile);
+        }catch (Exception e){
+            System.out.println("visualizer exception");
+            System.out.println(e);
+        }
+
+
+        assertTrue(imgFile.exists());
     }
 }

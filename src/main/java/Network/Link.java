@@ -26,6 +26,15 @@ public class Link {
         this.availableCapacity = capacity;
     }
 
+    public Link(Inet4Address node1Address, Inet4Address node2Address,
+                Integer node1Port, Integer node2Port, Integer capacity) {
+        this.node1Address = node1Address;
+        this.node2Address = node2Address;
+        this.node1Port = node1Port;
+        this.node2Port = node2Port;
+        this.capacity = capacity;
+    }
+
     public Integer getCapacity() {
         return capacity;
     }

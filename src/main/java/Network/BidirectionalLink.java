@@ -9,6 +9,12 @@ public class BidirectionalLink extends Link{
                              Double delay, Double loss) {
         super(node1Address, node2Address, node1Port, node2Port, capacity, delay, loss);
     }
+
+    public BidirectionalLink(Inet4Address node1Address, Inet4Address node2Address,
+                             Integer node1Port, Integer node2Port, Integer capacity) {
+        super(node1Address, node2Address, node1Port, node2Port, capacity);
+    }
+
     public Inet4Address getNode1Address() {
         return node1Address;
     }
